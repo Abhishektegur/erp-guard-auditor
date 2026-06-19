@@ -1,0 +1,10 @@
+user_id,name,department,role,status
+asmith,Alice Smith,Finance,AP_MANAGER,ACTIVE
+bjohnson,Bob Johnson,Finance,AP_CLERK,ACTIVE
+cbrown,Charlie Brown,IT,SYS_ADMIN,INACTIVE
+dmiller,David Miller,Procurement,PURCHASING_AGENT,ACTIVE
+edavis,Eve Davis,Marketing,MARKETING_USER,ACTIVE
+fwilson,Frank Wilson,Operations,RECEIVING_CLERK,ACTIVE
+glee,Grace Lee,Treasury,AP_APPROVER,ACTIVE
+hclark,Henry Clark,Finance,GL_CLERK,ACTIVE
+imartinez,Ivy Martinez,IT,SYS_ADMIN,ACTIVE

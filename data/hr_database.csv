@@ -1,0 +1,10 @@
+employee_id,name,department,status,termination_date
+asmith,Alice Smith,Finance,ACTIVE,
+bjohnson,Bob Johnson,Finance,ACTIVE,
+cbrown,Charlie Brown,IT,TERMINATED,2026-05-01
+dmiller,David Miller,Procurement,ACTIVE,
+edavis,Eve Davis,Marketing,ACTIVE,
+fwilson,Frank Wilson,Operations,ACTIVE,
+glee,Grace Lee,Treasury,ACTIVE,
+hclark,Henry Clark,Finance,ACTIVE,
+imartinez,Ivy Martinez,IT,ACTIVE,

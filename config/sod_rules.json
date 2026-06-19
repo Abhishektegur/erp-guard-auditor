@@ -1,0 +1,55 @@
+{
+  "audit_metadata": {
+    "system_name": "ERP-Guard",
+    "version": "1.0.0",
+    "last_updated": "2026-06-19"
+  },
+  "conflicting_permission_pairs": [
+    {
+      "id": "SOD_01_VENDOR_FRAUD",
+      "name": "Vendor Creation & Payment Approval Conflict",
+      "permission_a": "AP_CREATE_VENDOR",
+      "permission_b": "AP_APPROVE_PAYMENT",
+      "risk_level": "CRITICAL",
+      "description": "Prevents a user from creating a fictitious vendor and then approving a payment to that vendor."
+    },
+    {
+      "id": "SOD_02_PO_COLLUSION",
+      "name": "PO Creation & Goods Receipt Conflict",
+      "permission_a": "PO_CREATE",
+      "permission_b": "PO_RECEIVE_GOODS",
+      "risk_level": "HIGH",
+      "description": "Prevents a user from creating a purchase order and then confirming receipt of the goods, which could hide missing inventory."
+    },
+    {
+      "id": "SOD_03_GL_OVERRIDE",
+      "name": "GL Entry Creation & Posting Conflict",
+      "permission_a": "GL_CREATE_JOURNAL",
+      "permission_b": "GL_POST_JOURNAL",
+      "risk_level": "CRITICAL",
+      "description": "Prevents a user from creating and posting a journal entry directly without secondary review."
+    },
+    {
+      "id": "SOD_04_SYS_ADMIN_AUDIT",
+      "name": "System Admin & Log Deletion Conflict",
+      "permission_a": "SYS_ADMIN_CONFIG",
+      "permission_b": "SYS_DELETE_LOGS",
+      "risk_level": "HIGH",
+      "description": "Prevents a system administrator from performing configuration changes and then deleting the audit trails."
+    }
+  ],
+  "threshold_rules": {
+    "single_approval_limit": 10000.0,
+    "split_transaction_detection": {
+      "time_window_hours": 24,
+      "max_cumulative_ratio": 0.95,
+      "description": "Detects transactions split into multiple smaller amounts (each under the $10,000 threshold) made by the same user to the same vendor within 24 hours."
+    }
+  },
+  "department_permission_restrictions": {
+    "AP_APPROVE_PAYMENT": ["Finance", "Treasury"],
+    "GL_POST_JOURNAL": ["Finance", "Accounting"],
+    "PO_CREATE": ["Procurement", "Purchasing", "Operations"],
+    "SYS_ADMIN_CONFIG": ["IT", "System Administration"]
+  }
+}
