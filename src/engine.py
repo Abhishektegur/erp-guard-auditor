@@ -4,17 +4,75 @@ import pandas as pd
 from datetime import datetime
 
 class ERPAuditEngine:
-    def __init__(self, rules_path, data_dir):
+    def __init__(self, rules_path, data_dir=None, dataframes=None):
         self.rules_path = rules_path
-        self.data_dir = data_dir
-        
         self.rules = self._load_rules()
-        self.users_df = self._load_csv("users.csv")
-        self.permissions_df = self._load_csv("permissions.csv")
-        self.logs_df = self._load_csv("transaction_logs.csv")
-        self.hr_df = self._load_csv("hr_database.csv")
         
+        if dataframes is not None:
+            self.users_df = self.standardize_columns(dataframes.get("users"), "users")
+            self.permissions_df = self.standardize_columns(dataframes.get("permissions"), "permissions")
+            self.logs_df = self.standardize_columns(dataframes.get("transaction_logs"), "transaction_logs")
+            self.hr_df = self.standardize_columns(dataframes.get("hr_database"), "hr_database")
+        else:
+            self.data_dir = data_dir
+            self.users_df = self.standardize_columns(self._load_csv("users.csv"), "users")
+            self.permissions_df = self.standardize_columns(self._load_csv("permissions.csv"), "permissions")
+            self.logs_df = self.standardize_columns(self._load_csv("transaction_logs.csv"), "transaction_logs")
+            self.hr_df = self.standardize_columns(self._load_csv("hr_database.csv"), "hr_database")
+            
         self._prepare_data()
+
+    @staticmethod
+    def standardize_columns(df, sheet_type):
+        """Standardizes input dataframe column headers based on aliases."""
+        if df is None or len(df.columns) == 0:
+            return df
+            
+        # Map aliases to standard names
+        aliases = {
+            "users": {
+                "user_id": ["user_id", "user", "userid", "user id", "username", "employee_id", "employee id"],
+                "name": ["name", "full name", "employee name", "employee_name"],
+                "department": ["department", "dept", "business unit", "bu", "department_name"],
+                "role": ["role", "roles", "job role", "profile", "role_name"],
+                "status": ["status", "active", "state", "user_status"]
+            },
+            "permissions": {
+                "role": ["role", "roles", "job role", "profile", "role_name"],
+                "permission": ["permission", "privilege", "tcode", "transaction", "action", "permission_name"]
+            },
+            "transaction_logs": {
+                "transaction_id": ["transaction_id", "tx_id", "id", "doc_id", "document", "trans_id", "transaction id"],
+                "user_id": ["user_id", "user", "userid", "user id", "username"],
+                "action": ["action", "operation", "activity", "tcode", "permission"],
+                "amount": ["amount", "value", "cost", "total", "amount_value"],
+                "related_id": ["related_id", "related", "vendor_id", "vendor", "po_id", "document_id", "related id"],
+                "timestamp": ["timestamp", "time", "date", "datetime", "transaction_date"]
+            },
+            "hr_database": {
+                "employee_id": ["employee_id", "employee id", "id", "user_id", "user id", "username", "emp_id"],
+                "name": ["name", "full name", "employee name", "employee_name"],
+                "department": ["department", "dept", "business unit", "bu"],
+                "status": ["status", "active", "state", "employee_status"],
+                "termination_date": ["termination_date", "term_date", "resign_date", "exit_date", "termination date"]
+            }
+        }
+        
+        if sheet_type not in aliases:
+            return df
+            
+        mapping = {}
+        # Convert df columns to lowercase strings for matching
+        df_cols_lower = {str(c).lower().strip(): c for c in df.columns}
+        
+        for std_col, list_aliases in aliases[sheet_type].items():
+            for alias in list_aliases:
+                if alias.lower() in df_cols_lower:
+                    orig_col = df_cols_lower[alias.lower()]
+                    mapping[orig_col] = std_col
+                    break
+                    
+        return df.rename(columns=mapping)
 
     def _load_rules(self):
         with open(self.rules_path, "r") as f:

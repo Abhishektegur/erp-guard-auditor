@@ -121,3 +121,39 @@ def test_department_restrictions(test_env):
     
     edavis_violation = dept_violations[dept_violations["user_id"] == "edavis"].iloc[0]
     assert "Marketing" in edavis_violation["details"]
+
+def test_standardize_columns():
+    # Test case-insensitive alias matching, whitespace stripping, and unmapped columns remaining intact
+    df_users = pd.DataFrame(columns=["  User ID  ", "Employee Name", "BU", "Job Role", "Active", "unrelated_col"])
+    standardized_users = ERPAuditEngine.standardize_columns(df_users, "users")
+    
+    assert "user_id" in standardized_users.columns
+    assert "name" in standardized_users.columns
+    assert "department" in standardized_users.columns
+    assert "role" in standardized_users.columns
+    assert "status" in standardized_users.columns
+    assert "unrelated_col" in standardized_users.columns
+    
+    # Test permissions sheet mapping
+    df_perms = pd.DataFrame(columns=["Role_name", "TCode"])
+    standardized_perms = ERPAuditEngine.standardize_columns(df_perms, "permissions")
+    
+    assert "role" in standardized_perms.columns
+    assert "permission" in standardized_perms.columns
+    
+    # Test transaction logs mapping
+    df_logs = pd.DataFrame(columns=["Tx_id", "Username", "Operation", "Total", "Vendor_id", "Datetime"])
+    standardized_logs = ERPAuditEngine.standardize_columns(df_logs, "transaction_logs")
+    
+    assert "transaction_id" in standardized_logs.columns
+    assert "user_id" in standardized_logs.columns
+    assert "action" in standardized_logs.columns
+    assert "amount" in standardized_logs.columns
+    assert "related_id" in standardized_logs.columns
+    assert "timestamp" in standardized_logs.columns
+    
+    # Test empty or None inputs
+    assert ERPAuditEngine.standardize_columns(None, "users") is None
+    df_empty = pd.DataFrame()
+    assert ERPAuditEngine.standardize_columns(df_empty, "users").empty
+
